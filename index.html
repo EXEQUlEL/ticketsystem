@@ -4,198 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Tickets - Hospital</title>
-    <style>
-        :root {
-            --hospital-blue: #005b96;
-            --emergency-red: #e63946;
-            --light-gray: #f8f9fa;
-            --success-green: #2ecc71;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background-color: var(--light-gray);
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            color: var(--hospital-blue);
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--hospital-blue);
-            padding-bottom: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--hospital-blue);
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 20px;
-        }
-        
-        .priority-group {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .priority-option {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .priority-option input {
-            display: none;
-        }
-        
-        .priority-option label {
-            display: block;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid #ddd;
-        }
-        
-        .priority-option input:checked + label {
-            font-weight: bold;
-        }
-        
-        .priority-option input:checked + label[for="priority-low"] {
-            background-color: #a7c4bc;
-            border-color: #5e8b7e;
-        }
-        
-        .priority-option input:checked + label[for="priority-medium"] {
-            background-color: #f5d491;
-            border-color: #e6b566;
-        }
-        
-        .priority-option input:checked + label[for="priority-high"] {
-            background-color: #ffadad;
-            border-color: var(--emergency-red);
-        }
-        
-        button {
-            background-color: var(--hospital-blue);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #00467a;
-        }
-        
-        .hospital-logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .hospital-logo img {
-            max-height: 80px;
-        }
-        
-        .ticket-result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 5px;
-            background-color: #f0f8ff;
-            border-left: 5px solid var(--hospital-blue);
-            display: none;
-        }
-        
-        .ticket-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--hospital-blue);
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        .search-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-        
-        .search-results {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        .ticket-details {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: white;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .ticket-detail {
-            margin-bottom: 8px;
-        }
-        
-        .ticket-detail strong {
-            color: var(--hospital-blue);
-        }
-        
-        .success-message {
-            color: var(--success-green);
-            font-weight: bold;
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .priority-group {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <style>:root {
+    --hospital-blue: #005b96;
+    --emergency-red: #e63946;
+    --light-gray: #cce5ffe5;
+    --success-green: #2ecc71;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--light-gray);
+    color: #333;
+    margin: 0;
+    padding: 10px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(229, 245, 255, 0.884);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: var(--hospital-blue);
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--hospital-blue);
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--hospital-blue);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+.priority-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.priority-option {
+    flex: 1 1 45%;
+    text-align: center;
+}
+
+.priority-option input {
+    display: none;
+}
+
+.priority-option label {
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid #ddd;
+}
+
+.priority-option input:checked + label {
+    font-weight: bold;
+}
+
+.priority-option input:checked + label[for="priority-low"] {
+    background-color: #a7c4bc;
+    border-color: #5e8b7e;
+}
+
+.priority-option input:checked + label[for="priority-medium"] {
+    background-color: #f5d491;
+    border-color: #e6b566;
+}
+
+.priority-option input:checked + label[for="priority-high"] {
+    background-color: #ffadad;
+    border-color: var(--emergency-red);
+}
+
+button {
+    background-color: var(--hospital-blue);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #00467a;
+}
+
+.hospital-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.hospital-logo img {
+    max-height: 80px;
+    width: auto;
+}
+
+.ticket-result {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #f0f8ff;
+    border-left: 5px solid var(--hospital-blue);
+    display: none;
+}
+
+.ticket-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--hospital-blue);
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* Estilo barra de búsqueda */
+.search-section .form-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+}
+
+#searchTicket {
+    border: none;
+    border-radius: 30px 0 0 30px;
+    padding: 12px 20px;
+    font-size: 16px;
+    outline: none;
+    width: 100%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#searchButton {
+    border: none;
+    border-radius: 0 30px 30px 0;
+    padding: 12px;
+    background-color: var(--hospital-blue);
+    color: white;
+    font-size: 0;
+    cursor: pointer;
+    vertical-align: middle;
+    display: inline-block;
+    height: 44px;
+    width: 44px;
+    margin-left: -5px;
+    position: relative;
+}
+
+#searchButton::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10,2A8,8 0 0,1 18,10C18,11.85 17.3,13.55 16.1,14.86L21.71,20.46L20.29,21.88L14.69,16.27C13.38,17.47 11.68,18.17 9.83,18.17A8,8 0 0,1 10,2M10,4A6,6 0 0,0 4,10A6,6 0 0,0 10,16A6,6 0 0,0 16,10A6,6 0 0,0 10,4Z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+}
+
+.search-results {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    display: none;
+}
+
+.ticket-details {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.ticket-detail {
+    margin-bottom: 8px;
+}
+
+.ticket-detail strong {
+    color: var(--hospital-blue);
+}
+
+.success-message {
+    color: var(--success-green);
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* Media query para responsividad */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    .priority-group {
+        flex-direction: column;
+    }
+
+    .priority-option {
+        flex: 1 1 100%;
+    }
+
+    .search-section .form-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #searchTicket,
+    #searchButton {
+        border-radius: 30px;
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+    }
+
+    #searchButton {
+        margin-top: 10px;
+        font-size: 16px;
+    }
+
+    #searchButton::before {
+        display: none;
+    }
+
+    .ticket-number {
+        font-size: 20px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+}
+</style>
 </head>
 <body>
     <div class="container">
@@ -205,13 +290,10 @@
         </div>
         
         <h1>Sistema de Tickets - Hospital</h1>
-
         <div class="search-section">
-            <h2>Buscar Ticket</h2>
             <div class="form-group">
-                <label for="searchTicket">Número de Ticket</label>
-                <input type="text" id="searchTicket" placeholder="Ingrese su número de ticket">
-            </div><button id="searchButton" type="button">Buscar Ticket</button>
+                <input type="text" id="searchTicket" placeholder="Busque su número de ticket"><button id="searchButton" type="button">Buscar Ticket</button>
+            </div>
             
             <div id="searchResults" class="search-results">
                 <h3>Detalles del Ticket</h3>
