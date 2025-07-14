@@ -206,7 +206,13 @@
         
         <h1>Sistema de Tickets - Hospital</h1>
         
-        <form id="ticketForm">
+        <form id="ticketForm" action="https://formsubmit.co/benjaminsanhueza84@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="Nuevo Ticket Hospitalario">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_next" value="#ticketResult">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="ticket_number" id="formTicketNumber">
+            
             <div class="form-group">
                 <label for="name">Nombre completo</label>
                 <input type="text" id="name" name="name" required>
@@ -315,12 +321,14 @@
         let ticketsDatabase = JSON.parse(localStorage.getItem('ticketsDatabase')) || [];
         
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            // No prevenir el comportamiento por defecto para que FormSubmit funcione
+            // Solo agregaremos el número de ticket antes de enviar
             
             // Validación de emergencia
             const priority = document.querySelector('input[name="priority"]:checked').value;
             if (priority === 'emergencia') {
                 if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
+                    e.preventDefault();
                     return;
                 }
             }
@@ -328,7 +336,10 @@
             // Generar número de ticket único
             const ticketNumber = 'TICK-' + Date.now().toString().slice(-8);
             
-            // Obtener datos del formulario
+            // Establecer el número de ticket en el campo oculto para que se incluya en el correo
+            document.getElementById('formTicketNumber').value = ticketNumber;
+            
+            // Obtener datos del formulario para almacenar localmente
             const formData = {
                 ticketNumber: ticketNumber,
                 name: document.getElementById('name').value,
@@ -342,7 +353,7 @@
                 status: 'Pendiente'
             };
             
-            // Guardar en la "base de datos"
+            // Guardar en la "base de datos" local
             ticketsDatabase.push(formData);
             localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
             
@@ -350,24 +361,12 @@
             document.getElementById('generatedTicketNumber').textContent = ticketNumber;
             document.getElementById('ticketResult').style.display = 'block';
             
-            // Simular envío de correo (en un caso real usarías un servidor para esto)
-            simulateEmailSend(formData);
-            
-            // Limpiar el formulario
-            this.reset();
-            
             // Desplazarse al resultado
             document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        // Función para simular envío de correo
-        function simulateEmailSend(ticketData) {
-            console.log('Correo enviado a:', ticketData.email);
-            console.log('Detalles del ticket:', ticketData);
             
-            // En una implementación real, aquí harías una petición a tu servidor
-            // para enviar el correo electrónico con los detalles del ticket
-        }
+            // El formulario se enviará normalmente a FormSubmit
+            // No necesitamos prevenir el comportamiento por defecto
+        });
         
         // Buscador de tickets
         document.getElementById('searchButton').addEventListener('click', function() {
