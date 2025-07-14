@@ -9,7 +9,6 @@
             --hospital-blue: #005b96;
             --emergency-red: #e63946;
             --light-gray: #f8f9fa;
-            --success-green: #2ecc71;
         }
         
         body {
@@ -132,60 +131,6 @@
             max-height: 80px;
         }
         
-        .ticket-result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 5px;
-            background-color: #f0f8ff;
-            border-left: 5px solid var(--hospital-blue);
-            display: none;
-        }
-        
-        .ticket-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--hospital-blue);
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        .search-section {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-        
-        .search-results {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        .ticket-details {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: white;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .ticket-detail {
-            margin-bottom: 8px;
-        }
-        
-        .ticket-detail strong {
-            color: var(--hospital-blue);
-        }
-        
-        .success-message {
-            color: var(--success-green);
-            font-weight: bold;
-            text-align: center;
-            margin: 10px 0;
-        }
-        
         @media (max-width: 600px) {
             .container {
                 padding: 15px;
@@ -206,15 +151,14 @@
         
         <h1>Sistema de Tickets - Hospital</h1>
         
-        <form id="ticketForm">
+        <form id="ticketForm" action="https://formsubmit.co/benjaminsanhueza84@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="Nuevo Ticket Hospitalario">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_next" value="https://tupagina.github.io/gracias.html">
+            
             <div class="form-group">
                 <label for="name">Nombre completo</label>
                 <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" name="email" required>
             </div>
             
             <div class="form-group">
@@ -284,164 +228,20 @@
             
             <button type="submit">Generar Ticket</button>
         </form>
-        
-        <div id="ticketResult" class="ticket-result">
-            <div class="success-message">¡Ticket generado con éxito!</div>
-            <div>Su número de ticket es:</div>
-            <div id="generatedTicketNumber" class="ticket-number"></div>
-            <div>Hemos enviado un correo de confirmación con los detalles de su solicitud.</div>
-            <div>Por favor conserve este número para futuras consultas.</div>
-        </div>
-        
-        <div class="search-section">
-            <h2>Buscar Ticket</h2>
-            <div class="form-group">
-                <label for="searchTicket">Número de Ticket</label>
-                <input type="text" id="searchTicket" placeholder="Ingrese su número de ticket">
-            </div>
-            <button id="searchButton" type="button">Buscar Ticket</button>
-            
-            <div id="searchResults" class="search-results">
-                <h3>Detalles del Ticket</h3>
-                <div id="ticketInfo" class="ticket-details">
-                    <!-- Aquí se mostrarán los detalles del ticket -->
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
-        // Simulación de base de datos para almacenar tickets
-        let ticketsDatabase = JSON.parse(localStorage.getItem('ticketsDatabase')) || [];
-        
         document.getElementById('ticketForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validación de emergencia
+            // Validación adicional si es necesaria
             const priority = document.querySelector('input[name="priority"]:checked').value;
             if (priority === 'emergencia') {
                 if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
-                    return;
+                    e.preventDefault();
                 }
             }
             
-            // Generar número de ticket único
-            const ticketNumber = 'TICK-' + Date.now().toString().slice(-8);
-            
-            // Obtener datos del formulario
-            const formData = {
-                ticketNumber: ticketNumber,
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                department: document.getElementById('department').value,
-                ticketType: document.getElementById('ticket-type').value,
-                priority: priority,
-                description: document.getElementById('description').value,
-                contact: document.getElementById('contact').value,
-                date: new Date().toISOString(),
-                status: 'Pendiente'
-            };
-            
-            // Guardar en la "base de datos"
-            ticketsDatabase.push(formData);
-            localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
-            
-            // Mostrar el número de ticket al usuario
-            document.getElementById('generatedTicketNumber').textContent = ticketNumber;
-            document.getElementById('ticketResult').style.display = 'block';
-            
-            // Simular envío de correo (en un caso real usarías un servidor para esto)
-            simulateEmailSend(formData);
-            
-            // Limpiar el formulario
-            this.reset();
-            
-            // Desplazarse al resultado
-            document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+            // Aquí puedes agregar código para enviar a WhatsApp si es necesario
         });
-        
-        // Función para simular envío de correo
-        function simulateEmailSend(ticketData) {
-            console.log('Correo enviado a:', ticketData.email);
-            console.log('Detalles del ticket:', ticketData);
-            
-            // En una implementación real, aquí harías una petición a tu servidor
-            // para enviar el correo electrónico con los detalles del ticket
-        }
-        
-        // Buscador de tickets
-        document.getElementById('searchButton').addEventListener('click', function() {
-            const ticketNumber = document.getElementById('searchTicket').value.trim();
-            
-            if (!ticketNumber) {
-                alert('Por favor ingrese un número de ticket');
-                return;
-            }
-            
-            // Buscar en la "base de datos"
-            const ticket = ticketsDatabase.find(t => t.ticketNumber === ticketNumber);
-            
-            const resultsDiv = document.getElementById('searchResults');
-            const ticketInfoDiv = document.getElementById('ticketInfo');
-            
-            if (ticket) {
-                // Mostrar detalles del ticket
-                ticketInfoDiv.innerHTML = `
-                    <div class="ticket-detail"><strong>Número:</strong> ${ticket.ticketNumber}</div>
-                    <div class="ticket-detail"><strong>Nombre:</strong> ${ticket.name}</div>
-                    <div class="ticket-detail"><strong>Departamento:</strong> ${getDepartmentName(ticket.department)}</div>
-                    <div class="ticket-detail"><strong>Tipo:</strong> ${getTicketTypeName(ticket.ticketType)}</div>
-                    <div class="ticket-detail"><strong>Prioridad:</strong> ${getPriorityName(ticket.priority)}</div>
-                    <div class="ticket-detail"><strong>Descripción:</strong> ${ticket.description}</div>
-                    <div class="ticket-detail"><strong>Fecha:</strong> ${new Date(ticket.date).toLocaleString()}</div>
-                    <div class="ticket-detail"><strong>Estado:</strong> ${ticket.status}</div>
-                `;
-                resultsDiv.style.display = 'block';
-            } else {
-                ticketInfoDiv.innerHTML = '<div>No se encontró ningún ticket con ese número.</div>';
-                resultsDiv.style.display = 'block';
-            }
-            
-            // Desplazarse a los resultados
-            resultsDiv.scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        // Funciones auxiliares para mostrar nombres en lugar de valores
-        function getDepartmentName(value) {
-            const departments = {
-                'emergencia': 'Emergencias',
-                'pediatria': 'Pediatría',
-                'cirugia': 'Cirugía',
-                'cardiologia': 'Cardiología',
-                'laboratorio': 'Laboratorio',
-                'farmacia': 'Farmacia',
-                'administracion': 'Administración',
-                'mantenimiento': 'Mantenimiento'
-            };
-            return departments[value] || value;
-        }
-        
-        function getTicketTypeName(value) {
-            const types = {
-                'medica': 'Atención Médica',
-                'equipo': 'Falla de Equipo',
-                'suministro': 'Pedido de Suministros',
-                'limpieza': 'Limpieza/Desinfección',
-                'administrativa': 'Trámite Administrativo',
-                'otro': 'Otro'
-            };
-            return types[value] || value;
-        }
-        
-        function getPriorityName(value) {
-            const priorities = {
-                'baja': 'Baja',
-                'media': 'Media',
-                'alta': 'Alta',
-                'emergencia': 'Emergencia'
-            };
-            return priorities[value] || value;
-        }
     </script>
 </body>
 </html>
