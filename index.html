@@ -205,6 +205,21 @@
         </div>
         
         <h1>Sistema de Tickets - Hospital</h1>
+
+        <div class="search-section">
+            <h2>Buscar Ticket</h2>
+            <div class="form-group">
+                <label for="searchTicket">Número de Ticket</label>
+                <input type="text" id="searchTicket" placeholder="Ingrese su número de ticket">
+            </div><button id="searchButton" type="button">Buscar Ticket</button>
+            
+            <div id="searchResults" class="search-results">
+                <h3>Detalles del Ticket</h3>
+                <div id="ticketInfo" class="ticket-details">
+                    <!-- Aquí se mostrarán los detalles del ticket -->
+                </div>
+            </div>
+        </div>
         
         <form id="ticketForm" action="https://formsubmit.co/benjaminsanhueza84@gmail.com" method="POST">
             <input type="hidden" name="_subject" value="Nuevo Ticket Hospitalario">
@@ -299,21 +314,7 @@
             <div>Por favor conserve este número para futuras consultas.</div>
         </div>
         
-        <div class="search-section">
-            <h2>Buscar Ticket</h2>
-            <div class="form-group">
-                <label for="searchTicket">Número de Ticket</label>
-                <input type="text" id="searchTicket" placeholder="Ingrese su número de ticket">
-            </div>
-            <button id="searchButton" type="button">Buscar Ticket</button>
-            
-            <div id="searchResults" class="search-results">
-                <h3>Detalles del Ticket</h3>
-                <div id="ticketInfo" class="ticket-details">
-                    <!-- Aquí se mostrarán los detalles del ticket -->
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <script>
