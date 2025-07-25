@@ -397,8 +397,8 @@
 <body>
     <div class="container">
         <div class="hospital-logo">
-            <!-- Cambia esta ruta por tu logo -->
-            <img src="assets/hospital-logo.png" alt="Logo del Hospital">
+            <!-- Logo en base64 para evitar error 404 -->
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMTAwIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwNWI5NiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0Ij5Ib3NwaXRhbDwvdGV4dD48L3N2Zz4=" alt="Logo del Hospital">
         </div>
         
         <h1>Sistema de Tickets - Área de Informática</h1>
@@ -417,7 +417,7 @@
             </div>
         </div>
         
-        <form id="ticketForm" action="https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec" method="POST">
+        <form id="ticketForm">
             <input type="hidden" name="formType" value="ticket">
             <input type="hidden" name="ticket_number" id="formTicketNumber">
             
@@ -576,84 +576,72 @@
             document.getElementById('file-upload-text').textContent = fileName;
         });
         
-        // Envío del formulario
-      document.getElementById('ticketForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    const formDataObj = Object.fromEntries(formData.entries());
-    const submitButton = form.querySelector('button[type="submit"]');
-    const originalButtonText = submitButton.textContent;
-    
-    // Validación de emergencia
-    const priority = document.querySelector('input[name="priority"]:checked').value;
-    if (priority === 'Emergencia') {
-        if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
-            return;
-        }
-    }
-    
-    // Mostrar estado de carga
-    submitButton.textContent = 'Procesando...';
-    submitButton.disabled = true;
-    
-    // Solución CORS con Google Forms como intermediario
-    const googleFormUrl = 'https://docs.google.com/forms/d/e/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/formResponse';
-    const formFieldsMap = {
-        'name': 'entry.2005620554',
-        'email': 'entry.1045781291',
-        'department': 'entry.1065046570',
-        'ticket-type': 'entry.1166974658',
-        'priority': 'entry.839337160',
-        'description': 'entry.839337160',
-        'contact': 'entry.1234567890' // Reemplaza con IDs reales
-    };
-    
-    const urlParams = new URLSearchParams();
-    for (const key in formDataObj) {
-        if (formFieldsMap[key]) {
-            urlParams.append(formFieldsMap[key], formDataObj[key]);
-        }
-    }
-    
-    // Usar Google Forms como proxy
-    fetch(googleFormUrl, {
-        method: 'POST',
-        body: urlParams,
-        mode: 'no-cors'
-    })
-    .then(() => {
-        // Generar número de ticket localmente
-        const ticketNumber = 'TICK-' + Date.now().toString().slice(-8);
+        // Envío del formulario - Solución con iframe para evitar CORS
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const formDataObj = Object.fromEntries(formData.entries());
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            
+            // Validación de emergencia
+            const priority = document.querySelector('input[name="priority"]:checked').value;
+            if (priority === 'Emergencia') {
+                if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
+                    return;
+                }
+            }
+            
+            // Mostrar estado de carga
+            submitButton.textContent = 'Procesando...';
+            submitButton.disabled = true;
+            
+            // Generar número de ticket
+            const ticketNumber = 'TICK-' + Date.now().toString().slice(-8);
+            
+            try {
+                // Guardar en localStorage
+                const ticketData = {
+                    ticketNumber: ticketNumber,
+                    ...formDataObj,
+                    date: new Date().toISOString(),
+                    status: 'Pendiente',
+                    adminNotes: ''
+                };
+                
+                ticketsDatabase.push(ticketData);
+                localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
+                
+                // Enviar datos al Google Apps Script usando iframe
+                const scriptUrl = 'https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec';
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = `${scriptUrl}?${new URLSearchParams(formDataObj).toString()}`;
+                document.body.appendChild(iframe);
+                
+                // Mostrar resultado al usuario
+                document.getElementById('generatedTicketNumber').textContent = ticketNumber;
+                document.getElementById('ticketResult').style.display = 'block';
+                
+                // Resetear formulario
+                form.reset();
+                document.getElementById('file-name').textContent = '';
+                document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
+                
+                // Eliminar iframe después de 5 segundos
+                setTimeout(() => iframe.remove(), 5000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar el ticket localmente: ' + error.message);
+            } finally {
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+            }
+        });
         
-        // Mostrar resultado al usuario
-        document.getElementById('generatedTicketNumber').textContent = ticketNumber;
-        document.getElementById('ticketResult').style.display = 'block';
-        
-        // Guardar en localStorage
-        const ticketData = {
-            ticketNumber: ticketNumber,
-            ...formDataObj,
-            date: new Date().toISOString(),
-            status: 'Pendiente'
-        };
-        
-        ticketsDatabase.push(ticketData);
-        localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
-        
-        // Resetear formulario
-        form.reset();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al enviar el formulario. Por favor intente nuevamente.');
-    })
-    .finally(() => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-    });
-});
         // Buscador de tickets
         document.getElementById('searchButton').addEventListener('click', function() {
             const ticketNumber = document.getElementById('searchTicket').value.trim();
