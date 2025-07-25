@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Tickets - Área de Informática</title>
+    <style>
+        :root {
+            --hospital-blue: #005b96;
+            --emergency-red: #55080e;
+            --light-gray: #cce5ffe5;
+            --success-green: #2ecc71;
+            --warning-orange: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-gray);
+            color: #333;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(229, 245, 255, 0.884);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--hospital-blue);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--hospital-blue);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--hospital-blue);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+        }
+
+        .priority-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .priority-option {
+            flex: 1 1 45%;
+            text-align: center;
+        }
+
+        .priority-option input {
+            display: none;
+        }
+
+        .priority-option label {
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+        }
+
+        .priority-option input:checked + label {
+            font-weight: bold;
+        }
+
+        .priority-option input:checked + label[for="priority-low"] {
+            background-color: #a7c4bc;
+            border-color: #5e8b7e;
+        }
+
+        .priority-option input:checked + label[for="priority-medium"] {
+            background-color: #f5d491;
+            border-color: #e6b566;
+        }
+
+        .priority-option input:checked + label[for="priority-high"] {
+            background-color: #db6b6b;
+            border-color: var(--emergency-red);
+        }
+        .priority-option input:checked + label[for="priority-emergency"] {
+            background-color: #2c0a0a;
+            color: #f1e6e6;
+            border-color: var(--emergency-red);
+        }
+
+        button {
+            background-color: var(--hospital-blue);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #00467a;
+        }
+
+        .button-warning {
+            background-color: var(--warning-orange);
+        }
+
+        .button-warning:hover {
+            background-color: #d35400;
+        }
+
+        .hospital-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .hospital-logo img {
+            max-height: 80px;
+            width: auto;
+        }
+
+        .ticket-result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+            border-left: 5px solid var(--hospital-blue);
+            display: none;
+        }
+
+        .ticket-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--hospital-blue);
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        /* Estilo barra de búsqueda */
+        .search-section .form-group {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 0;
+        }
+
+        #searchTicket {
+            border: none;
+            border-radius: 30px 0 0 30px;
+            padding: 12px 20px;
+            font-size: 16px;
+            outline: none;
+            width: 100%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #searchButton {
+            border: none;
+            border-radius: 0 30px 30px 0;
+            padding: 12px;
+            background-color: var(--hospital-blue);
+            color: white;
+            font-size: 0;
+            cursor: pointer;
+            vertical-align: middle;
+            display: inline-block;
+            height: 44px;
+            width: 44px;
+            margin-left: -5px;
+            position: relative;
+        }
+
+        #searchButton::before {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10,2A8,8 0 0,1 18,10C18,11.85 17.3,13.55 16.1,14.86L21.71,20.46L20.29,21.88L14.69,16.27C13.38,17.47 11.68,18.17 9.83,18.17A8,8 0 0,1 10,2M10,4A6,6 0 0,0 4,10A6,6 0 0,0 10,16A6,6 0 0,0 16,10A6,6 0 0,0 10,4Z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+            top: 12px;
+            left: 12px;
+        }
+
+        .search-results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .ticket-details {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .ticket-detail {
+            margin-bottom: 8px;
+        }
+
+        .ticket-detail strong {
+            color: var(--hospital-blue);
+        }
+
+        .success-message {
+            color: var(--success-green);
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pendiente {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-proceso {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .status-resuelto {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status-cancelado {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .file-upload {
+            margin-top: 10px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .file-upload-label:hover {
+            background: #e9ecef;
+        }
+
+        .file-upload-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Panel de administración */
+        .admin-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+
+        .admin-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tickets-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .ticket-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .ticket-item:hover {
+            background-color: #f0f8ff;
+        }
+
+        .ticket-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        /* Media query para responsividad */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .priority-group {
+                flex-direction: column;
+            }
+
+            .priority-option {
+                flex: 1 1 100%;
+            }
+
+            .search-section .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #searchTicket,
+            #searchButton {
+                border-radius: 30px;
+                width: 100%;
+                max-width: none;
+                margin-left: 0;
+            }
+
+            #searchButton {
+                margin-top: 10px;
+                font-size: 16px;
+            }
+
+            #searchButton::before {
+                display: none;
+            }
+
+            .ticket-number {
+                font-size: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hospital-logo">
+            <!-- Cambia esta ruta por tu logo -->
+            <img src="assets/hospital-logo.png" alt="Logo del Hospital">
+        </div>
+        
+        <h1>Sistema de Tickets - Área de Informática</h1>
+        
+        <div class="search-section">
+            <div class="form-group">
+                <input type="text" id="searchTicket" placeholder="Busque su número de ticket">
+                <button id="searchButton" type="button">Buscar Ticket</button>
+            </div>
+            
+            <div id="searchResults" class="search-results">
+                <h3>Detalles del Ticket</h3>
+                <div id="ticketInfo" class="ticket-details">
+                    <!-- Aquí se mostrarán los detalles del ticket -->
+                </div>
+            </div>
+        </div>
+        
+        <form id="ticketForm" action="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" method="POST">
+            <input type="hidden" name="formType" value="ticket">
+            <input type="hidden" name="ticket_number" id="formTicketNumber">
+            
+            <div class="form-group">
+                <label for="name">Nombre completo</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Departamento/Área</label>
+                <select id="department" name="department" required>
+                    <option value="" disabled selected>Seleccione un área</option>
+                    <option value="Urgencias">Urgencias</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Dental">Dental</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Laboratorio">Laboratorio</option>
+                    <option value="Farmacia">Farmacia</option>
+                    <option value="Administración">Administración</option>
+                    <option value="Mantención">Mantención</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ticket-type">Tipo de Solicitud</label>
+                <select id="ticket-type" name="ticket-type" required>
+                    <option value="" disabled selected>Seleccione un tipo</option>
+                    <option value="Ayuda Informática">Ayuda Informática</option>
+                    <option value="Falla de Equipo">Falla de Equipo</option>
+                    <option value="Pedido de Suministros">Pedido de Suministros</option>
+                    <option value="Reparación">Reparación</option>
+                    <option value="Trámite Administrativo">Trámite Administrativo</option>
+                    <option value="Solicitud de Software">Solicitud de Software</option>
+                    <option value="Problema de Red">Problema de Red</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Prioridad</label>
+                <div class="priority-group">
+                    <div class="priority-option">
+                        <input type="radio" id="priority-low" name="priority" value="Baja">
+                        <label for="priority-low">Baja</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" id="priority-medium" name="priority" value="Media" checked>
+                        <label for="priority-medium">Media</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" id="priority-high" name="priority" value="Alta">
+                        <label for="priority-high">Alta</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" id="priority-emergency" name="priority" value="Emergencia">
+                        <label for="priority-emergency" style="color: #e75b67;">Emergencia</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Descripción detallada</label>
+                <textarea id="description" name="description" rows="5" required placeholder="Describa el problema con el mayor detalle posible, incluyendo pasos para reproducirlo si aplica"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="contact">Método de Contacto Preferido</label>
+                <select id="contact" name="contact" required>
+                    <option value="" disabled selected>Seleccione un método</option>
+                    <option value="Correo Electrónico">Correo Electrónico</option>
+                    <option value="Llamada Telefónica">Llamada Telefónica</option>
+                    <option value="Visita Presencial">Visita Presencial</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Adjuntar archivo (opcional)</label>
+                <div class="file-upload">
+                    <label for="file-upload-input" class="file-upload-label">
+                        <span id="file-upload-text">Arrastre archivos aquí o haga clic para seleccionar</span>
+                        <input type="file" id="file-upload-input" class="file-upload-input" name="attachment">
+                    </label>
+                    <div id="file-name" class="file-name"></div>
+                </div>
+            </div>
+            
+            <button type="submit">Generar Ticket</button>
+        </form>
+        
+        <div id="ticketResult" class="ticket-result">
+            <div class="success-message">¡Ticket generado con éxito!</div>
+            <div>Su número de ticket es:</div>
+            <div id="generatedTicketNumber" class="ticket-number"></div>
+            <div>Hemos enviado un correo de confirmación con los detalles de su solicitud.</div>
+            <div>Por favor conserve este número para futuras consultas.</div>
+        </div>
+        
+        <!-- Panel de administración (oculto por defecto) -->
+        <div class="admin-toggle">
+            <button id="toggleAdminPanel" class="button-warning">Acceso Administrador</button>
+        </div>
+        
+        <div id="adminPanel" class="admin-panel">
+            <h2>Panel de Administración</h2>
+            <div class="form-group">
+                <input type="password" id="adminPassword" placeholder="Contraseña de administrador">
+                <button id="adminLogin" class="button-warning">Ingresar</button>
+            </div>
+            
+            <div id="adminContent" style="display: none;">
+                <h3>Tickets Recientes</h3>
+                <div class="tickets-list" id="ticketsList">
+                    <!-- Aquí se cargarán los tickets -->
+                </div>
+                
+                <div id="ticketAdminDetails" class="ticket-details" style="display: none; margin-top: 20px;">
+                    <h3>Administrar Ticket</h3>
+                    <div id="adminTicketInfo"></div>
+                    
+                    <div class="form-group">
+                        <label for="statusUpdate">Cambiar Estado:</label>
+                        <select id="statusUpdate">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Resuelto">Resuelto</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminNotes">Notas Internas:</label>
+                        <textarea id="adminNotes" rows="3"></textarea>
+                    </div>
+                    
+                    <button id="updateTicketStatus" class="button-warning">Actualizar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulación de base de datos para almacenar tickets
+        let ticketsDatabase = JSON.parse(localStorage.getItem('ticketsDatabase')) || [];
+        const ADMIN_PASSWORD = "admin123"; // Cambia esto por una contraseña segura
+        
+        // Manejar la subida de archivos
+        document.getElementById('file-upload-input').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+            document.getElementById('file-name').textContent = fileName;
+            document.getElementById('file-upload-text').textContent = fileName;
+        });
+        
+        // Envío del formulario
+        document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const formDataObj = Object.fromEntries(formData.entries());
+            
+            // Validación de emergencia
+            const priority = document.querySelector('input[name="priority"]:checked').value;
+            if (priority === 'Emergencia') {
+                if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
+                    return;
+                }
+            }
+            
+            try {
+                // Mostrar carga mientras se procesa
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                submitButton.textContent = 'Procesando...';
+                submitButton.disabled = true;
+                
+                // Enviar datos al servidor (Google Apps Script)
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(formDataObj).toString()
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Mostrar el número de ticket al usuario
+                    document.getElementById('generatedTicketNumber').textContent = result.ticketNumber;
+                    document.getElementById('ticketResult').style.display = 'block';
+                    
+                    // Guardar en localStorage para búsqueda local
+                    const ticketData = {
+                        ticketNumber: result.ticketNumber,
+                        ...formDataObj,
+                        date: new Date().toISOString(),
+                        status: 'Pendiente',
+                        adminNotes: ''
+                    };
+                    
+                    ticketsDatabase.push(ticketData);
+                    localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
+                    
+                    // Desplazarse al resultado
+                    document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Resetear formulario
+                    form.reset();
+                    document.getElementById('file-name').textContent = '';
+                    document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
+                } else {
+                    alert('Error al generar el ticket: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error al enviar el formulario: ' + error.message);
+            } finally {
+                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false;
+            }
+        });
+        
+        // Buscador de tickets
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const ticketNumber = document.getElementById('searchTicket').value.trim();
+            
+            if (!ticketNumber) {
+                alert('Por favor ingrese un número de ticket');
+                return;
+            }
+            
+            // Buscar en la base de datos local
+            const ticket = ticketsDatabase.find(t => t.ticketNumber === ticketNumber);
+            
+            const resultsDiv = document.getElementById('searchResults');
+            const ticketInfoDiv = document.getElementById('ticketInfo');
+            
+            if (ticket) {
+                // Mostrar detalles del ticket
+                ticketInfoDiv.innerHTML = `
+                    <div class="ticket-detail"><strong>Número:</strong> ${ticket.ticketNumber}</div>
+                    <div class="ticket-detail"><strong>Nombre:</strong> ${ticket.name}</div>
+                    <div class="ticket-detail"><strong>Correo:</strong> ${ticket.email}</div>
+                    <div class="ticket-detail"><strong>Departamento:</strong> ${ticket.department}</div>
+                    <div class="ticket-detail"><strong>Tipo:</strong> ${ticket['ticket-type']}</div>
+                    <div class="ticket-detail"><strong>Prioridad:</strong> ${ticket.priority}</div>
+                    <div class="ticket-detail"><strong>Descripción:</strong> ${ticket.description}</div>
+                    <div class="ticket-detail"><strong>Contacto:</strong> ${ticket.contact}</div>
+                    <div class="ticket-detail"><strong>Fecha:</strong> ${new Date(ticket.date).toLocaleString()}</div>
+                    <div class="ticket-detail"><strong>Estado:</strong> <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span></div>
+                    ${ticket.adminNotes ? `<div class="ticket-detail"><strong>Notas Internas:</strong> ${ticket.adminNotes}</div>` : ''}
+                `;
+                resultsDiv.style.display = 'block';
+            } else {
+                ticketInfoDiv.innerHTML = '<div>No se encontró ningún ticket con ese número. Por favor verifique el número o contacte al área de informática.</div>';
+                resultsDiv.style.display = 'block';
+            }
+            
+            // Desplazarse a los resultados
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Panel de administración
+        document.getElementById('toggleAdminPanel').addEventListener('click', function() {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        document.getElementById('adminLogin').addEventListener('click', function() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('adminContent').style.display = 'block';
+                document.getElementById('adminPassword').style.display = 'none';
+                document.getElementById('adminLogin').style.display = 'none';
+                
+                // Cargar tickets en el panel de administración
+                loadTicketsForAdmin();
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        });
+        
+        function loadTicketsForAdmin() {
+            const ticketsList = document.getElementById('ticketsList');
+            ticketsList.innerHTML = '';
+            
+            if (ticketsDatabase.length === 0) {
+                ticketsList.innerHTML = '<div>No hay tickets registrados</div>';
+                return;
+            }
+            
+            // Ordenar por fecha (más recientes primero)
+            const sortedTickets = [...ticketsDatabase].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedTickets.forEach(ticket => {
+                const ticketItem = document.createElement('div');
+                ticketItem.className = 'ticket-item';
+                ticketItem.innerHTML = `
+                    <div class="ticket-item-header">
+                        <strong>${ticket.ticketNumber}</strong>
+                        <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                    </div>
+                    <div>${ticket.name} - ${ticket.department}</div>
+                    <div>${ticket['ticket-type']} (${ticket.priority})</div>
+                    <small>${new Date(ticket.date).toLocaleString()}</small>
+                `;
+                
+                ticketItem.addEventListener('click', () => showTicketDetailsForAdmin(ticket));
+                ticketsList.appendChild(ticketItem);
+            });
+        }
+        
+        function showTicketDetailsForAdmin(ticket) {
+            const detailsDiv = document.getElementById('adminTicketInfo');
+            const ticketAdminDetails = document.getElementById('ticketAdminDetails');
+            
+            detailsDiv.innerHTML = `
+                <div class="ticket-detail"><strong>Número:</strong> ${ticket.ticketNumber}</div>
+                <div class="ticket-detail"><strong>Nombre:</strong> ${ticket.name}</div>
+                <div class="ticket-detail"><strong>Correo:</strong> ${ticket.email}</div>
+                <div class="ticket-detail"><strong>Departamento:</strong> ${ticket.department}</div>
+                <div class="ticket-detail"><strong>Tipo:</strong> ${ticket['ticket-type']}</div>
+                <div class="ticket-detail"><strong>Prioridad:</strong> ${ticket.priority}</div>
+                <div class="ticket-detail"><strong>Descripción:</strong> ${ticket.description}</div>
+                <div class="ticket-detail"><strong>Contacto:</strong> ${ticket.contact}</div>
+                <div class="ticket-detail"><strong>Fecha:</strong> ${new Date(ticket.date).toLocaleString()}</div>
+            `;
+            
+            document.getElementById('statusUpdate').value = ticket.status;
+            document.getElementById('adminNotes').value = ticket.adminNotes || '';
+            
+            // Guardar referencia al ticket actual
+            detailsDiv.dataset.ticketNumber = ticket.ticketNumber;
+            
+            ticketAdminDetails.style.display = 'block';
+            ticketAdminDetails.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        document.getElementById('updateTicketStatus').addEventListener('click', function() {
+            const ticketNumber = document.getElementById('adminTicketInfo').dataset.ticketNumber;
+            const newStatus = document.getElementById('statusUpdate').value;
+            const adminNotes = document.getElementById('adminNotes').value;
+            
+            const ticketIndex = ticketsDatabase.findIndex(t => t.ticketNumber === ticketNumber);
+            
+            if (ticketIndex !== -1) {
+                ticketsDatabase[ticketIndex].status = newStatus;
+                ticketsDatabase[ticketIndex].adminNotes = adminNotes;
+                
+                localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
+                
+                alert('Ticket actualizado correctamente');
+                loadTicketsForAdmin();
+                
+                // Ocultar detalles después de actualizar
+                document.getElementById('ticketAdminDetails').style.display = 'none';
+            }
+        });
+        
+        // Permitir búsqueda al presionar Enter
+        document.getElementById('searchTicket').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchButton').click();
+            }
+        });
+    </script>
+</body>
+</html>

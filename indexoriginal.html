@@ -6,7 +6,7 @@
     <title>Sistema de Tickets - Hospital</title>
     <style>:root {
     --hospital-blue: #005b96;
-    --emergency-red: #e63946;
+    --emergency-red: #55080e;
     --light-gray: #cce5ffe5;
     --success-green: #2ecc71;
 }
@@ -109,10 +109,14 @@ select {
 }
 
 .priority-option input:checked + label[for="priority-high"] {
-    background-color: #ffadad;
+    background-color: #db6b6b;
     border-color: var(--emergency-red);
 }
-
+.priority-option input:checked + label[for="priority-emergency"] {
+    background-color: #2c0a0a;
+    color: #f1e6e6;
+    border-color: var(--emergency-red);
+}
 button {
     background-color: var(--hospital-blue);
     color: white;
@@ -324,14 +328,14 @@ button:hover {
                 <label for="department">Departamento/Área</label>
                 <select id="department" name="department" required>
                     <option value="" disabled selected>Seleccione un área</option>
-                    <option value="emergencia">Emergencias</option>
+                    <option value="Urgencias">Urgencias</option>
                     <option value="pediatria">Pediatría</option>
-                    <option value="cirugia">Cirugía</option>
+                    <option value="Dental">Dental</option>
                     <option value="cardiologia">Cardiología</option>
                     <option value="laboratorio">Laboratorio</option>
                     <option value="farmacia">Farmacia</option>
                     <option value="administracion">Administración</option>
-                    <option value="mantenimiento">Mantenimiento</option>
+                    <option value="mantención">mantención</option>
                 </select>
             </div>
             
@@ -339,10 +343,10 @@ button:hover {
                 <label for="ticket-type">Tipo de Solicitud</label>
                 <select id="ticket-type" name="ticket-type" required>
                     <option value="" disabled selected>Seleccione un tipo</option>
-                    <option value="medica">Atención Médica</option>
+                    <option value="ayuda">Ayuda Informatica</option>
                     <option value="equipo">Falla de Equipo</option>
                     <option value="suministro">Pedido de Suministros</option>
-                    <option value="limpieza">Limpieza/Desinfección</option>
+                    <option value="Reparación">Reparación</option>
                     <option value="administrativa">Trámite Administrativo</option>
                     <option value="otro">Otro</option>
                 </select>
@@ -365,7 +369,7 @@ button:hover {
                     </div>
                     <div class="priority-option">
                         <input type="radio" id="priority-emergency" name="priority" value="emergencia">
-                        <label for="priority-emergency" style="color: var(--emergency-red);">Emergencia</label>
+                        <label for="priority-emergency" style="color: #e75b67;">Emergencia</label>
                     </div>
                 </div>
             </div>
