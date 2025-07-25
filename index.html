@@ -577,7 +577,7 @@
         });
         
         // Envío del formulario
-        document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+       document.getElementById('ticketForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const form = e.target;
@@ -599,34 +599,38 @@
         submitButton.textContent = 'Procesando...';
         submitButton.disabled = true;
         
-        // URL alternativa para evitar CORS
+        // URL directa sin proxy (mejor para desarrollo)
         const scriptUrl = 'https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec';
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(scriptUrl)}`;
         
-        // Enviar datos al servidor (Google Apps Script)
-        const response = await fetch(proxyUrl, {
+        // Enviar datos directamente al Google Script
+        const response = await fetch(scriptUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams(formDataObj).toString()
+            body: new URLSearchParams(formDataObj).toString(),
+            redirect: 'follow' // Importante para Google Apps Script
         });
         
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
+        // Verificar si la respuesta es texto plano o JSON
+        const responseText = await response.text();
+        let result;
+        
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.warn('La respuesta no es JSON válido:', responseText);
+            throw new Error('El servidor respondió con un formato inesperado');
         }
         
-        const result = await response.json();
-        const parsedResult = JSON.parse(result.contents); // Parsear el contenido de AllOrigins
-        
-        if (parsedResult.status === 'success') {
+        if (result && result.status === 'success') {
             // Mostrar el número de ticket al usuario
-            document.getElementById('generatedTicketNumber').textContent = parsedResult.ticketNumber;
+            document.getElementById('generatedTicketNumber').textContent = result.ticketNumber;
             document.getElementById('ticketResult').style.display = 'block';
             
             // Guardar en localStorage para búsqueda local
             const ticketData = {
-                ticketNumber: parsedResult.ticketNumber,
+                ticketNumber: result.ticketNumber,
                 ...formDataObj,
                 date: new Date().toISOString(),
                 status: 'Pendiente',
@@ -644,10 +648,10 @@
             document.getElementById('file-name').textContent = '';
             document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
         } else {
-            throw new Error(parsedResult.message || 'Error desconocido al generar el ticket');
+            throw new Error(result.message || 'Error desconocido al generar el ticket');
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error completo:', error);
         alert('Error al enviar el formulario: ' + error.message);
     } finally {
         if (submitButton) {
