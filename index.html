@@ -578,73 +578,84 @@
         
         // Envío del formulario
         document.getElementById('ticketForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const form = e.target;
-            const formData = new FormData(form);
-            const formDataObj = Object.fromEntries(formData.entries());
-            
-            // Validación de emergencia
-            const priority = document.querySelector('input[name="priority"]:checked').value;
-            if (priority === 'Emergencia') {
-                if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
-                    return;
-                }
-            }
-            
-            try {
-                // Mostrar carga mientras se procesa
-                const submitButton = form.querySelector('button[type="submit"]');
-                const originalButtonText = submitButton.textContent;
-                submitButton.textContent = 'Procesando...';
-                submitButton.disabled = true;
-                
-                // Enviar datos al servidor (Google Apps Script)
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams(formDataObj).toString()
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    // Mostrar el número de ticket al usuario
-                    document.getElementById('generatedTicketNumber').textContent = result.ticketNumber;
-                    document.getElementById('ticketResult').style.display = 'block';
-                    
-                    // Guardar en localStorage para búsqueda local
-                    const ticketData = {
-                        ticketNumber: result.ticketNumber,
-                        ...formDataObj,
-                        date: new Date().toISOString(),
-                        status: 'Pendiente',
-                        adminNotes: ''
-                    };
-                    
-                    ticketsDatabase.push(ticketData);
-                    localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
-                    
-                    // Desplazarse al resultado
-                    document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
-                    
-                    // Resetear formulario
-                    form.reset();
-                    document.getElementById('file-name').textContent = '';
-                    document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
-                } else {
-                    alert('Error al generar el ticket: ' + result.message);
-                }
-            } catch (error) {
-                alert('Error al enviar el formulario: ' + error.message);
-            } finally {
-                submitButton.textContent = originalButtonText;
-                submitButton.disabled = false;
-            }
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const formDataObj = Object.fromEntries(formData.entries());
+    
+    // Validación de emergencia
+    const priority = document.querySelector('input[name="priority"]:checked').value;
+    if (priority === 'Emergencia') {
+        if (!confirm('¿Está seguro que este ticket es una EMERGENCIA? Se notificará al personal inmediatamente.')) {
+            return;
+        }
+    }
+    
+    try {
+        // Mostrar carga mientras se procesa
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Procesando...';
+        submitButton.disabled = true;
+        
+        // URL alternativa para evitar CORS
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec';
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(scriptUrl)}`;
+        
+        // Enviar datos al servidor (Google Apps Script)
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(formDataObj).toString()
         });
         
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        
+        const result = await response.json();
+        const parsedResult = JSON.parse(result.contents); // Parsear el contenido de AllOrigins
+        
+        if (parsedResult.status === 'success') {
+            // Mostrar el número de ticket al usuario
+            document.getElementById('generatedTicketNumber').textContent = parsedResult.ticketNumber;
+            document.getElementById('ticketResult').style.display = 'block';
+            
+            // Guardar en localStorage para búsqueda local
+            const ticketData = {
+                ticketNumber: parsedResult.ticketNumber,
+                ...formDataObj,
+                date: new Date().toISOString(),
+                status: 'Pendiente',
+                adminNotes: ''
+            };
+            
+            ticketsDatabase.push(ticketData);
+            localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
+            
+            // Desplazarse al resultado
+            document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
+            
+            // Resetear formulario
+            form.reset();
+            document.getElementById('file-name').textContent = '';
+            document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
+        } else {
+            throw new Error(parsedResult.message || 'Error desconocido al generar el ticket');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al enviar el formulario: ' + error.message);
+    } finally {
+        if (submitButton) {
+            submitButton.textContent = originalButtonText;
+            submitButton.disabled = false;
+        }
+    }
+});
         // Buscador de tickets
         document.getElementById('searchButton').addEventListener('click', function() {
             const ticketNumber = document.getElementById('searchTicket').value.trim();
