@@ -615,7 +615,7 @@
                 localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
                 
                 // Enviar datos al Google Apps Script usando iframe
-                const scriptUrl = 'https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec';
+                const scriptUrl = 'https://script.google.com/macros/s/AKfycby-AKfycbzTbVsZGW0Y08t717GosAFOZV7JMSfsYv6XYl7EpE_s6u_dMx_0U1PXWTIHc6Qg-Oj70Q/exec';
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 iframe.src = `${scriptUrl}?${new URLSearchParams(formDataObj).toString()}`;
