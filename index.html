@@ -577,12 +577,14 @@
         });
         
         // Envío del formulario
-       document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      document.getElementById('ticketForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = e.target;
     const formData = new FormData(form);
     const formDataObj = Object.fromEntries(formData.entries());
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.textContent;
     
     // Validación de emergencia
     const priority = document.querySelector('input[name="priority"]:checked').value;
@@ -592,73 +594,65 @@
         }
     }
     
-    try {
-        // Mostrar carga mientras se procesa
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalButtonText = submitButton.textContent;
-        submitButton.textContent = 'Procesando...';
-        submitButton.disabled = true;
-        
-        // URL directa sin proxy (mejor para desarrollo)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec';
-        
-        // Enviar datos directamente al Google Script
-        const response = await fetch(scriptUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(formDataObj).toString(),
-            redirect: 'follow' // Importante para Google Apps Script
-        });
-        
-        // Verificar si la respuesta es texto plano o JSON
-        const responseText = await response.text();
-        let result;
-        
-        try {
-            result = JSON.parse(responseText);
-        } catch (jsonError) {
-            console.warn('La respuesta no es JSON válido:', responseText);
-            throw new Error('El servidor respondió con un formato inesperado');
-        }
-        
-        if (result && result.status === 'success') {
-            // Mostrar el número de ticket al usuario
-            document.getElementById('generatedTicketNumber').textContent = result.ticketNumber;
-            document.getElementById('ticketResult').style.display = 'block';
-            
-            // Guardar en localStorage para búsqueda local
-            const ticketData = {
-                ticketNumber: result.ticketNumber,
-                ...formDataObj,
-                date: new Date().toISOString(),
-                status: 'Pendiente',
-                adminNotes: ''
-            };
-            
-            ticketsDatabase.push(ticketData);
-            localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
-            
-            // Desplazarse al resultado
-            document.getElementById('ticketResult').scrollIntoView({ behavior: 'smooth' });
-            
-            // Resetear formulario
-            form.reset();
-            document.getElementById('file-name').textContent = '';
-            document.getElementById('file-upload-text').textContent = 'Arrastre archivos aquí o haga clic para seleccionar';
-        } else {
-            throw new Error(result.message || 'Error desconocido al generar el ticket');
-        }
-    } catch (error) {
-        console.error('Error completo:', error);
-        alert('Error al enviar el formulario: ' + error.message);
-    } finally {
-        if (submitButton) {
-            submitButton.textContent = originalButtonText;
-            submitButton.disabled = false;
+    // Mostrar estado de carga
+    submitButton.textContent = 'Procesando...';
+    submitButton.disabled = true;
+    
+    // Solución CORS con Google Forms como intermediario
+    const googleFormUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+    const formFieldsMap = {
+        'name': 'entry.2005620554',
+        'email': 'entry.1045781291',
+        'department': 'entry.1065046570',
+        'ticket-type': 'entry.1166974658',
+        'priority': 'entry.839337160',
+        'description': 'entry.839337160',
+        'contact': 'entry.1234567890' // Reemplaza con IDs reales
+    };
+    
+    const urlParams = new URLSearchParams();
+    for (const key in formDataObj) {
+        if (formFieldsMap[key]) {
+            urlParams.append(formFieldsMap[key], formDataObj[key]);
         }
     }
+    
+    // Usar Google Forms como proxy
+    fetch(googleFormUrl, {
+        method: 'POST',
+        body: urlParams,
+        mode: 'no-cors'
+    })
+    .then(() => {
+        // Generar número de ticket localmente
+        const ticketNumber = 'TICK-' + Date.now().toString().slice(-8);
+        
+        // Mostrar resultado al usuario
+        document.getElementById('generatedTicketNumber').textContent = ticketNumber;
+        document.getElementById('ticketResult').style.display = 'block';
+        
+        // Guardar en localStorage
+        const ticketData = {
+            ticketNumber: ticketNumber,
+            ...formDataObj,
+            date: new Date().toISOString(),
+            status: 'Pendiente'
+        };
+        
+        ticketsDatabase.push(ticketData);
+        localStorage.setItem('ticketsDatabase', JSON.stringify(ticketsDatabase));
+        
+        // Resetear formulario
+        form.reset();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al enviar el formulario. Por favor intente nuevamente.');
+    })
+    .finally(() => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+    });
 });
         // Buscador de tickets
         document.getElementById('searchButton').addEventListener('click', function() {
