@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulario de Ticket</title>
+</head>
+<body>
+  <h2>Enviar Ticket</h2>
+  <form id="ticketForm">
+    <input type="text" name="name" placeholder="Nombre completo" required><br>
+    <input type="email" name="email" placeholder="Correo electrónico" required><br>
+    <input type="text" name="department" placeholder="Departamento" required><br>
+    <select name="ticket-type">
+      <option value="Soporte">Soporte</option>
+      <option value="Consulta">Consulta</option>
+    </select><br>
+    <select name="priority">
+      <option value="Alta">Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select><br>
+    <textarea name="description" placeholder="Describe el problema" required></textarea><br>
+    <input type="text" name="contact" placeholder="Teléfono de contacto" required><br>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <div id="responseMessage"></div>
+
+  <script>
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const jsonData = Object.fromEntries(formData.entries());
+
+      const response = await fetch('https://script.google.com/macros/s/AKfycby-kSCPnpv5Or6nooMQIZG6NS1eQg1jXcgJpW8Dt_u42cz77KFv256IwUWVXL50w_ZFAA/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+      });
+
+      const result = await response.json();
+      const messageDiv = document.getElementById('responseMessage');
+
+      if (result.status === 'success') {
+        messageDiv.innerHTML = `<p>✅ Ticket enviado. Número de seguimiento: <strong>${result.ticketNumber}</strong></p>`;
+        form.reset();
+      } else {
+        messageDiv.innerHTML = `<p>❌ Error: ${result.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
